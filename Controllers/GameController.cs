@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TicTacToeAPI.Data;
 using TicTacToeAPI.Models;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace TicTacToeAPI.Controllers
@@ -17,22 +18,21 @@ namespace TicTacToeAPI.Controllers
             _context = context;
         }
 
-        // Start a new game
+        // ✅ Start a new game
         [HttpPost("start")]
         public async Task<IActionResult> StartGame([FromBody] Game newGame)
         {
-            newGame.BoardState = "---------"; // Empty 3x3 board
-            newGame.CurrentPlayer = "X";
-            newGame.IsGameOver = false;
-            newGame.Winner = null;
+            if (newGame.Size < 3 || newGame.WinLength < 3)
+                return BadRequest("Board size and win length must be at least 3.");
 
+            newGame.InitializeBoard();
             _context.Games.Add(newGame);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetGame), new { id = newGame.Id }, newGame);
         }
 
-        // Get game by ID
+        // ✅ Get game by ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGame(int id)
         {
@@ -41,7 +41,7 @@ namespace TicTacToeAPI.Controllers
             return Ok(game);
         }
 
-        // Make a move
+        // ✅ Make a move
         [HttpPost("{id}/move")]
         public async Task<IActionResult> MakeMove(int id, [FromBody] Move move)
         {
@@ -49,52 +49,72 @@ namespace TicTacToeAPI.Controllers
             if (game == null || game.IsGameOver)
                 return BadRequest("Game not found or already over");
 
-            // Convert BoardState string to char array
-            char[] board = game.BoardState?.ToCharArray() ?? new char[9];
+            char[,] board = game.GetBoard();
 
-            int index = move.Row * 3 + move.Column;
-
-            if (index < 0 || index >= board.Length || board[index] != '-')
+            // Validate move
+            if (move.Row < 0 || move.Row >= game.Size || move.Column < 0 || move.Column >= game.Size || board[move.Row, move.Column] != '-')
                 return BadRequest("Invalid move");
 
-            // Make the move
-            board[index] = move.Player[0];
+            // Make move
+            if (string.IsNullOrEmpty(move.Player))
+                return BadRequest("Player cannot be null or empty.");
 
-            // ✅ Use helper function to convert back to string
-            game.BoardState = ConvertBoardToString(board);
+            board[move.Row, move.Column] = move.Player[0];
+            game.SetBoard(board);
 
             // Check for win
-            if (CheckWin(board, move.Player[0]))
+            if (CheckWin(board, move.Player[0], game.WinLength))
             {
                 game.IsGameOver = true;
                 game.Winner = move.Player;
             }
 
-            // Switch turn
+            // Switch player turn
             game.CurrentPlayer = (game.CurrentPlayer == "X") ? "O" : "X";
-
             await _context.SaveChangesAsync();
 
             return Ok(game);
         }
 
-        // ✅ Helper method to convert char array to string safely
-        private string ConvertBoardToString(char[] board)
+        // ✅ Win checking logic (from your original game)
+        private bool CheckWin(char[,] board, char mark, int winLength)
         {
-            return new string(board);
+            int size = board.GetLength(0);
+
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    if (CheckDirection(board, i, j, 1, 0, mark, winLength) || // Horizontal
+                        CheckDirection(board, i, j, 0, 1, mark, winLength) || // Vertical
+                        CheckDirection(board, i, j, 1, 1, mark, winLength) || // Diagonal \
+                        CheckDirection(board, i, j, 1, -1, mark, winLength)) // Diagonal /
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
-
-
-        private bool CheckWin(char[] board, char mark)
+        private bool CheckDirection(char[,] board, int row, int col, int rowDir, int colDir, char mark, int winLength)
         {
-            string winPattern = new string(mark, 3);
+            int size = board.GetLength(0);
+            int count = 0;
 
-            string[] rows = { new string(board[0..3]), new string(board[3..6]), new string(board[6..9]) };
-            string[] cols = { $"{board[0]}{board[3]}{board[6]}", $"{board[1]}{board[4]}{board[7]}", $"{board[2]}{board[5]}{board[8]}" };
-            string[] diags = { $"{board[0]}{board[4]}{board[8]}", $"{board[2]}{board[4]}{board[6]}" };
+            for (int i = 0; i < winLength; i++)
+            {
+                int newRow = row + i * rowDir;
+                int newCol = col + i * colDir;
 
-            return rows.Concat(cols).Concat(diags).Any(line => line == winPattern);
+                if (newRow >= 0 && newRow < size && newCol >= 0 && newCol < size && board[newRow, newCol] == mark)
+                {
+                    count++;
+                }
+                else break;
+            }
+
+            return count >= winLength;
         }
     }
 }
