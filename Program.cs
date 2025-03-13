@@ -7,18 +7,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TicTacToeDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(5000); // HTTP
-    options.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // HTTPS
-});
+builder.WebHost.UseUrls("http://127.0.0.1:5000", "https://127.0.0.1:5001");
+
 
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
-app.UseAuthorization();
+//app.UseHttpsRedirection();
+//app.UseAuthorization();
 app.MapControllers();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
 
 app.Run();

@@ -22,10 +22,12 @@ namespace TicTacToeAPI.Controllers
         [HttpPost("start")]
         public async Task<IActionResult> StartGame([FromBody] Game newGame)
         {
-            if (newGame.Size < 3 || newGame.WinLength < 3)
-                return BadRequest("Board size and win length must be at least 3.");
+            if (newGame == null)
+                return BadRequest("Invalid request body");
 
-            newGame.InitializeBoard();
+            newGame.InitializeBoard(); // ✅ Ensure board is initialized
+            newGame.Winner = ""; // ✅ Ensure default empty winner
+
             _context.Games.Add(newGame);
             await _context.SaveChangesAsync();
 
@@ -49,32 +51,22 @@ namespace TicTacToeAPI.Controllers
             if (game == null || game.IsGameOver)
                 return BadRequest("Game not found or already over");
 
-            char[,] board = game.GetBoard();
+            List<List<char>> board = game.GetBoard();
 
             // Validate move
-            if (move.Row < 0 || move.Row >= game.Size || move.Column < 0 || move.Column >= game.Size || board[move.Row, move.Column] != '-')
+            if (move.Row < 0 || move.Row >= game.Size || move.Column < 0 || move.Column >= game.Size || board[move.Row][move.Column] != '-')
                 return BadRequest("Invalid move");
 
             // Make move
-            if (string.IsNullOrEmpty(move.Player))
-                return BadRequest("Player cannot be null or empty.");
-
-            board[move.Row, move.Column] = move.Player[0];
+            board[move.Row][move.Column] = move.Player[0];
             game.SetBoard(board);
 
-            // Check for win
-            if (CheckWin(board, move.Player[0], game.WinLength))
-            {
-                game.IsGameOver = true;
-                game.Winner = move.Player;
-            }
-
-            // Switch player turn
-            game.CurrentPlayer = (game.CurrentPlayer == "X") ? "O" : "X";
+            // Save changes
             await _context.SaveChangesAsync();
 
             return Ok(game);
         }
+
 
         // ✅ Win checking logic (from your original game)
         private bool CheckWin(char[,] board, char mark, int winLength)
