@@ -21,13 +21,13 @@ namespace TicTacToeAPI.Models
         public int WinLength { get; set; } = 3;
 
         [Required]
-        public string BoardState { get; set; } = ""; // ✅ Default empty board
+        public string BoardState { get; set; } = "[]"; // ✅ Default empty board
 
         public string CurrentPlayer { get; set; } = "X";
         public bool IsGameOver { get; set; } = false;
 
         [Required]
-        public string Winner { get; set; } = ""; // ✅ Default empty winner
+        public string Winner { get; set; } = "-"; // ✅ Default empty winner
 
         // ✅ Initialize Board
         public void InitializeBoard()
