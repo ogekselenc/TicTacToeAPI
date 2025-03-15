@@ -27,7 +27,7 @@ namespace TicTacToeAPI.Models
         public bool IsGameOver { get; set; } = false;
 
         [Required]
-        public string Winner { get; set; } = "-"; // ✅ Default empty winner
+        public string Winner { get; set; } = "A"; // ✅ Default empty winner
 
         // ✅ Initialize Board
         public void InitializeBoard()
@@ -38,7 +38,7 @@ namespace TicTacToeAPI.Models
                 List<char> row = new List<char>();
                 for (int j = 0; j < Size; j++)
                 {
-                    row.Add('-');
+                    row.Add('A');
                 }
                 board.Add(row);
             }
@@ -48,8 +48,15 @@ namespace TicTacToeAPI.Models
         // ✅ Convert Board JSON String to List<List<char>>
         public List<List<char>> GetBoard()
         {
-            return JsonSerializer.Deserialize<List<List<char>>>(BoardState) ?? new List<List<char>>();
-        }
+            try
+            {
+                return JsonSerializer.Deserialize<List<List<char>>>(BoardState) ?? new List<List<char>>();
+            }
+            catch (Exception)
+            {
+                return new List<List<char>>();
+            }
+        } 
 
         // ✅ Convert List<List<char>> Back to JSON String
         public void SetBoard(List<List<char>> board)
