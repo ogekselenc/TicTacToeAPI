@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using TicTacToeAPI.Data;
 using TicTacToeAPI.Hubs;
@@ -8,10 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TicTacToeDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.WebHost.UseUrls("http://127.0.0.1:5000", "https://127.0.0.1:5001");
+builder.WebHost.UseUrls("http://localhost:5000"); // Allow localhost
 
 // Add SignalR services
 builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.HandshakeTimeout = TimeSpan.FromSeconds(30); // Increase timeout to 30 seconds
+});
 
 // Detailed logging for SignalR
 builder.Services.AddLogging(loggingBuilder =>
@@ -22,12 +27,11 @@ builder.Services.AddLogging(loggingBuilder =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
+    options.AddPolicy("AllowAll", builder =>
     {
-        builder.WithOrigins("http://your-client-domain")
+        builder.AllowAnyOrigin()
                .AllowAnyHeader()
-               .AllowAnyMethod()
-               .AllowCredentials();
+               .AllowAnyMethod();
     });
 });
 
@@ -35,14 +39,10 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
-app.UseAuthorization();
+app.UseCors("AllowAll");
+app.UseWebSockets();
+app.MapHub<GameHub>("/ws/join").RequireCors("AllowAll");
 app.MapControllers();
-
-// Map the SignalR hub
-app.MapHub<GameHub>("/gameHub").RequireCors("AllowAll");
-
-app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
