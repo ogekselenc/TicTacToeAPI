@@ -1,67 +1,101 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Text.Json;
+using System.ComponentModel.DataAnnotations.Schema;
+
+
 
 namespace TicTacToeAPI.Models
 {
     public class Game
     {
-        [Key]
         public int Id { get; set; }
+        public string PlayerX { get; set; } = string.Empty;
+        public string PlayerO { get; set; } = string.Empty;
+        public int BoardSize { get; set; }
+        public int WinningLine { get; set; }
+        public string CurrentTurn { get; set; } = "X";  // Start with X
 
-        [Required]
-        public string Player1 { get; set; } = string.Empty; // ✅ Default empty string
+        [NotMapped] // Tells EF Core to ignore this property
+        public string[,] Board { get; set; }
 
-        [Required]
-        public string Player2 { get; set; } = string.Empty; // ✅ Default empty string
-
-        public int Size { get; set; } = 3;
-        public int WinLength { get; set; } = 3;
-
-        [Required]
-        public string BoardState { get; set; } = "[]"; // ✅ Default empty board
-
-        public string CurrentPlayer { get; set; } = "X";
+        public string BoardJson
+        {
+            get => JsonSerializer.Serialize(Board);
+            set => Board = JsonSerializer.Deserialize<string[,]>(value) ?? new string[0, 0];
+        }
+        public string Winner { get; set; } = string.Empty;
         public bool IsGameOver { get; set; } = false;
 
-        [Required]
-        public string Winner { get; set; } = "A"; // ✅ Default empty winner
-
-        // ✅ Initialize Board
-        public void InitializeBoard()
+        public Game()
         {
-            List<List<char>> board = new List<List<char>>();
-            for (int i = 0; i < Size; i++)
-            {
-                List<char> row = new List<char>();
-                for (int j = 0; j < Size; j++)
-                {
-                    row.Add('A');
-                }
-                board.Add(row);
-            }
-            BoardState = JsonSerializer.Serialize(board);
+            InitializeBoard();
         }
 
-        // ✅ Convert Board JSON String to List<List<char>>
-        public List<List<char>> GetBoard()
+        public void InitializeBoard()
         {
-            try
-            {
-                return JsonSerializer.Deserialize<List<List<char>>>(BoardState) ?? new List<List<char>>();
-            }
-            catch (Exception)
-            {
-                return new List<List<char>>();
-            }
-        } 
+            Board = new string[BoardSize, BoardSize];
+            for (int i = 0; i < BoardSize; i++)
+                for (int j = 0; j < BoardSize; j++)
+                    Board[i, j] = "";
+        }
 
-        // ✅ Convert List<List<char>> Back to JSON String
-        public void SetBoard(List<List<char>> board)
+        public bool MakeMove(int row, int col, string player)
         {
-            BoardState = JsonSerializer.Serialize(board);
+            if (IsGameOver || Board[row, col] != "" || player != CurrentTurn)
+                return false;
+
+            Board[row, col] = player;
+            if (CheckWinner(row, col, player))
+            {
+                Winner = player;
+                IsGameOver = true;
+            }
+            else if (IsBoardFull())
+            {
+                IsGameOver = true;
+                Winner = "Draw";
+            }
+            else
+            {
+                CurrentTurn = (CurrentTurn == "X") ? "O" : "X";
+            }
+            return true;
+        }
+
+        private bool IsBoardFull()
+        {
+            return Board.Cast<string>().All(cell => cell != "");
+        }
+
+        private bool CheckWinner(int row, int col, string player)
+        {
+            return CheckDirection(row, col, player, 1, 0) || // Horizontal
+                   CheckDirection(row, col, player, 0, 1) || // Vertical
+                   CheckDirection(row, col, player, 1, 1) || // Diagonal \
+                   CheckDirection(row, col, player, 1, -1);  // Diagonal /
+        }
+
+        private bool CheckDirection(int row, int col, string player, int dRow, int dCol)
+        {
+            int count = 1;
+            count += CountInDirection(row, col, player, dRow, dCol);
+            count += CountInDirection(row, col, player, -dRow, -dCol);
+            return count >= WinningLine;
+        }
+
+        private int CountInDirection(int row, int col, string player, int dRow, int dCol)
+        {
+            int count = 0;
+            int i = row + dRow, j = col + dCol;
+            while (i >= 0 && i < BoardSize && j >= 0 && j < BoardSize && Board[i, j] == player)
+            {
+                count++;
+                i += dRow;
+                j += dCol;
+            }
+            return count;
         }
     }
 }

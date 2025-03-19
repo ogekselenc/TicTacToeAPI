@@ -9,15 +9,15 @@ using TicTacToeAPI.Data;
 
 namespace TicTacToeAPI.Migrations
 {
-    [DbContext(typeof(TicTacToeDbContext))]
-    [Migration("20250312223830_UpdateBoardModel")]
-    partial class UpdateBoardModel
+    [DbContext(typeof(GameDbContext))]
+    [Migration("20250319204201_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.2");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.3");
 
             modelBuilder.Entity("TicTacToeAPI.Models.Game", b =>
                 {
@@ -25,38 +25,59 @@ namespace TicTacToeAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("BoardState")
+                    b.Property<string>("BoardJson")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CurrentPlayer")
+                    b.Property<int>("BoardSize")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CurrentTurn")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsGameOver")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Player1")
+                    b.Property<string>("PlayerO")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Player2")
+                    b.Property<string>("PlayerX")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Size")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("WinLength")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Winner")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("WinningLine")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.ToTable("Games");
+                });
+
+            modelBuilder.Entity("TicTacToeAPI.Models.Player", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GamesPlayed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GamesWon")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Players");
                 });
 #pragma warning restore 612, 618
         }
