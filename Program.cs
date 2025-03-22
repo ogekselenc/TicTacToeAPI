@@ -1,13 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using TicTacToeAPI.Data;
 using TicTacToeAPI.Repositories;
-
-
+using TicTacToeAPI.Services;
+using TicTacToeAPI.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Dodaj konekcioni string iz appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.WebHost.UseUrls("http://127.0.0.1:5000");
 
 // Konfiguracija DbContext-a
 builder.Services.AddDbContext<TicTacToeDbContext>(options =>
@@ -22,6 +25,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<GameService>();
 builder.Services.AddScoped<PlayerService>();
 builder.Services.AddScoped<MoveService>();
+builder.Services.AddSignalR();
+
 
 
 // Dodavanje kontrolera
@@ -36,7 +41,6 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader());
 });
 
-// Konfiguracija API-ja
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -44,12 +48,14 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-// Podešavanje HTTP Request Pipeline-a
-app.UseHttpsRedirection();
 app.UseRouting();
-app.UseCors("AllowAll");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<GameHub>("/gameHub");
+});
 
-app.UseAuthorization();
+app.UseCors("AllowAll");
 app.MapControllers();
 
 app.Run();

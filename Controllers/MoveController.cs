@@ -1,21 +1,25 @@
 using Microsoft.AspNetCore.Mvc;
 using TicTacToeAPI.Services;
 
-[Route("api/move")]
-[ApiController]
-public class MoveController : ControllerBase
+namespace TicTacToeAPI.Controllers
 {
-    private readonly MoveService _moveService;
 
-    public MoveController(MoveService moveService)
+    [Route("api/move")]
+    [ApiController]
+    public class MoveController : ControllerBase
     {
-        _moveService = moveService;
-    }
+        private readonly MoveService _moveService;
 
-    [HttpPost("play")]
-    public IActionResult MakeMove(int gameId, int playerId, int x, int y)
-    {
-        _moveService.MakeMove(gameId, playerId, x, y);
-        return Ok();
+        public MoveController(MoveService moveService)
+        {
+            _moveService = moveService;
+        }
+
+        [HttpPost("play")]
+        public IActionResult MakeMove(int gameId, int playerId, int x, int y)
+        {
+            _moveService.MakeMove(gameId, playerId, x, y);
+            return Ok();
+        }
     }
 }

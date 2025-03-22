@@ -1,26 +1,30 @@
 using TicTacToeAPI.Models;
 using TicTacToeAPI.Repositories;
 
-public class MoveService
+namespace TicTacToeAPI.Services
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public MoveService(IUnitOfWork unitOfWork)
+    public class MoveService
     {
-        _unitOfWork = unitOfWork;
-    }
+        private readonly IUnitOfWork _unitOfWork;
 
-    public void MakeMove(int gameId, int playerId, int x, int y)
-    {
-        var move = new Move
+        public MoveService(IUnitOfWork unitOfWork)
         {
-            GameId = gameId,
-            PlayerId = playerId,
-            X = x,
-            Y = y
-        };
+            _unitOfWork = unitOfWork;
+        }
 
-        _unitOfWork.MoveRepository.Add(move);
-        _unitOfWork.Save();
+        public void MakeMove(int gameId, int playerId, int x, int y)
+        {
+            var move = new Move
+            {
+                GameId = gameId,
+                PlayerId = playerId,
+                PositionX = x,
+                PositionY = y
+            };
+
+            _unitOfWork.MoveRepository.Add(move);
+            _unitOfWork.Save();
+        }
     }
+
 }

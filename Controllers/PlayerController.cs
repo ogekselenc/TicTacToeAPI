@@ -2,21 +2,25 @@ using Microsoft.AspNetCore.Mvc;
 using TicTacToeAPI.Models;
 using TicTacToeAPI.Services;
 
-[Route("api/player")]
-[ApiController]
-public class PlayerController : ControllerBase
+namespace TicTacToeAPI.Controllers
 {
-    private readonly PlayerService _playerService;
 
-    public PlayerController(PlayerService playerService)
+    [Route("api/player")]
+    [ApiController]
+    public class PlayerController : ControllerBase
     {
-        _playerService = playerService;
-    }
+        private readonly PlayerService _playerService;
 
-    [HttpPost("register")]
-    public IActionResult RegisterPlayer([FromBody] string name)
-    {
-        var player = _playerService.RegisterPlayer(name);
-        return Ok(player);
+        public PlayerController(PlayerService playerService)
+        {
+            _playerService = playerService;
+        }
+
+        [HttpPost("register")]
+        public IActionResult RegisterPlayer([FromBody] string name)
+        {
+            var player = _playerService.RegisterPlayer(name);
+            return Ok(player);
+        }
     }
 }

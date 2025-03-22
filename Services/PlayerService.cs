@@ -1,20 +1,24 @@
 using TicTacToeAPI.Models;
 using TicTacToeAPI.Repositories;
 
-public class PlayerService
+namespace TicTacToeAPI.Services
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public PlayerService(IUnitOfWork unitOfWork)
+    public class PlayerService
     {
-        _unitOfWork = unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public PlayerService(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public Player RegisterPlayer(string name)
+        {
+            var player = new Player { Name = name };
+            _unitOfWork.PlayerRepository.Add(player);
+            _unitOfWork.Save();
+            return player;
+        }
     }
 
-    public Player RegisterPlayer(string name)
-    {
-        var player = new Player { Name = name };
-        _unitOfWork.PlayerRepository.Add(player);
-        _unitOfWork.Save();
-        return player;
-    }
 }

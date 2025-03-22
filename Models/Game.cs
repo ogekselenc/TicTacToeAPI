@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TicTacToeAPI.Repositories;
 
 namespace TicTacToeAPI.Models
 {
@@ -17,6 +18,7 @@ namespace TicTacToeAPI.Models
 
         public Player PlayerX { get; set; }
         public Player PlayerO { get; set; }
-        public List<Move> Moves { get; set; }
+
+        public ICollection<Move> Moves { get; set; }
     }
 }

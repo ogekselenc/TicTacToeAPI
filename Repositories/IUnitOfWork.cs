@@ -1,7 +1,10 @@
-public interface IUnitOfWork
+namespace TicTacToeAPI.Repositories
 {
-    IGameRepository GameRepository { get; }
-    IPlayerRepository PlayerRepository { get; }
-    IMoveRepository MoveRepository { get; }
-    void Save();
+    public interface IUnitOfWork
+    {
+        IGameRepository GameRepository { get; }
+        IPlayerRepository PlayerRepository { get; }
+        IMoveRepository MoveRepository { get; }
+        void Save();
+    }
 }

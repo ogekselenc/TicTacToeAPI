@@ -3,6 +3,9 @@ using System.Linq;
 using TicTacToeAPI.Data;
 using TicTacToeAPI.Models;
 
+namespace TicTacToeAPI.Repositories
+{
+
 public class GameRepository : IGameRepository
 {
     private readonly TicTacToeDbContext _context;
@@ -16,4 +19,5 @@ public class GameRepository : IGameRepository
     public IEnumerable<Game> GetAll() => _context.Games.ToList();
     public void Add(Game game) => _context.Games.Add(game);
     public void Update(Game game) => _context.Games.Update(game);
+}
 }

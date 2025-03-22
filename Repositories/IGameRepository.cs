@@ -1,10 +1,14 @@
 using System.Collections.Generic;
 using TicTacToeAPI.Models;
 
-public interface IGameRepository
+namespace TicTacToeAPI.Repositories
 {
-    Game GetById(int gameId);
-    IEnumerable<Game> GetAll();
-    void Add(Game game);
-    void Update(Game game);
+
+    public interface IGameRepository
+    {
+        Game GetById(int gameId);
+        IEnumerable<Game> GetAll();
+        void Add(Game game);
+        void Update(Game game);
+    }
 }
