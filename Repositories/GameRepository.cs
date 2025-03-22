@@ -1,52 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using TicTacToeAPI.Data;
 using TicTacToeAPI.Models;
 
-namespace TicTacToeAPI.Repositories
+public class GameRepository : IGameRepository
 {
-    public class GameRepository
+    private readonly TicTacToeDbContext _context;
+
+    public GameRepository(TicTacToeDbContext context)
     {
-        private readonly GameDbContext _context;
-
-        public GameRepository(GameDbContext context)
-        {
-            _context = context;
-        }
-
-        public async Task<Game> CreateGameAsync(Game game)
-        {
-            _context.Games.Add(game);
-            await _context.SaveChangesAsync();
-            return game;
-        }
-
-        public async Task<Game> GetGameByIdAsync(int id)
-        {
-            return await _context.Games.FindAsync(id);
-        }
-
-        public async Task<List<Game>> GetAllGamesAsync()
-        {
-            return await _context.Games.ToListAsync();
-        }
-
-        public async Task UpdateGameAsync(Game game)
-        {
-            _context.Games.Update(game);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteGameAsync(int id)
-        {
-            var game = await _context.Games.FindAsync(id);
-            if (game != null)
-            {
-                _context.Games.Remove(game);
-                await _context.SaveChangesAsync();
-            }
-        }
+        _context = context;
     }
+
+    public Game GetById(int gameId) => _context.Games.Find(gameId);
+    public IEnumerable<Game> GetAll() => _context.Games.ToList();
+    public void Add(Game game) => _context.Games.Add(game);
+    public void Update(Game game) => _context.Games.Update(game);
 }

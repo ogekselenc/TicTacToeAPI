@@ -1,44 +1,22 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TicTacToeAPI.Models;
-using TicTacToeAPI.Repositories;
+using TicTacToeAPI.Services;
 
-namespace TicTacToeAPI.Controllers
+[Route("api/player")]
+[ApiController]
+public class PlayerController : ControllerBase
 {
-    [ApiController]
-    [Route("api/players")]
-    public class PlayerController : ControllerBase
+    private readonly PlayerService _playerService;
+
+    public PlayerController(PlayerService playerService)
     {
-        private readonly PlayerRepository _playerRepository;
+        _playerService = playerService;
+    }
 
-        public PlayerController(PlayerRepository playerRepository)
-        {
-            _playerRepository = playerRepository;
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreatePlayer([FromBody] Player player)
-        {
-            var newPlayer = await _playerRepository.CreatePlayerAsync(player);
-            return CreatedAtAction(nameof(GetPlayerByUsername), new { username = newPlayer.Username }, newPlayer);
-        }
-
-        [HttpGet("{username}")]
-        public async Task<IActionResult> GetPlayerByUsername(string username)
-        {
-            var player = await _playerRepository.GetPlayerByUsernameAsync(username);
-            if (player == null)
-                return NotFound();
-
-            return Ok(player);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllPlayers()
-        {
-            var players = await _playerRepository.GetAllPlayersAsync();
-            return Ok(players);
-        }
+    [HttpPost("register")]
+    public IActionResult RegisterPlayer([FromBody] string name)
+    {
+        var player = _playerService.RegisterPlayer(name);
+        return Ok(player);
     }
 }
