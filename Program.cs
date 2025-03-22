@@ -14,7 +14,8 @@ builder.WebHost.UseUrls("http://127.0.0.1:5000");
 
 // Konfiguracija DbContext-a
 builder.Services.AddDbContext<TicTacToeDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 // Registracija Repository Pattern-a i Unit of Work-a
 builder.Services.AddScoped<IGameRepository, GameRepository>();
