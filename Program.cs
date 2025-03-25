@@ -1,61 +1,60 @@
 using Microsoft.EntityFrameworkCore;
-using TicTacToeAPI.Data;
+using TicTacToeAPI.Models;
 using TicTacToeAPI.Repositories;
+using TicTacToeAPI.Interfaces;
 using TicTacToeAPI.Services;
-using TicTacToeAPI.Hubs;
-using Microsoft.AspNetCore.SignalR;
+using TicTacToeAPI.Mappings;
+using TicTacToeAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Dodaj konekcioni string iz appsettings.json
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Add services to the container.
 
-builder.WebHost.UseUrls("http://127.0.0.1:5000");
-
-// Konfiguracija DbContext-a
-builder.Services.AddDbContext<TicTacToeDbContext>(options =>
+// Configure DbContext with connection string from configuration
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
-// Registracija Repository Pattern-a i Unit of Work-a
-builder.Services.AddScoped<IGameRepository, GameRepository>();
-builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
-builder.Services.AddScoped<IMoveRepository, MoveRepository>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-// Registracija servisnog sloja
-builder.Services.AddScoped<GameService>();
-builder.Services.AddScoped<PlayerService>();
-builder.Services.AddScoped<MoveService>();
-builder.Services.AddSignalR();
-
-
-
-// Dodavanje kontrolera
+// Add controllers
 builder.Services.AddControllers();
 
-// Omogućavanje CORS-a ako frontend zahteva (možeš kasnije podesiti)
+// Register Unit of Work
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+// Add AutoMapper
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
+// Register services
+builder.Services.AddScoped<IPlayerService, PlayerService>();
+builder.Services.AddScoped<IGameService, GameService>();
+
+// Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
         policy => policy.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
+                      .AllowAnyMethod()
+                      .AllowAnyHeader());
+});
+
+// Add Swagger/OpenAPI support
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "TicTacToe API", Version = "v1" });
 });
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TicTacToe API v1"));
     app.UseDeveloperExceptionPage();
 }
 
 app.UseRouting();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-    endpoints.MapHub<GameHub>("/gameHub");
-});
-
+// Add exception handling middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors("AllowAll");
 app.MapControllers();
 

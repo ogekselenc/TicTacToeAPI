@@ -1,25 +1,31 @@
 using Microsoft.AspNetCore.Mvc;
-using TicTacToeAPI.Services;
+using TicTacToeAPI.DTOs;
+using TicTacToeAPI.Interfaces;
 
-namespace TicTacToeAPI.Controllers
+namespace TicTacToeAPI.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class MovesController : ControllerBase
 {
+    private readonly IGameService _gameService;
 
-    [Route("api/move")]
-    [ApiController]
-    public class MoveController : ControllerBase
+    public MovesController(IGameService gameService)
     {
-        private readonly MoveService _moveService;
+        _gameService = gameService;
+    }
 
-        public MoveController(MoveService moveService)
-        {
-            _moveService = moveService;
-        }
-
-        [HttpPost("play")]
-        public IActionResult MakeMove(int gameId, int playerId, int x, int y)
-        {
-            _moveService.MakeMove(gameId, playerId, x, y);
-            return Ok();
-        }
+    /// <summary>
+    /// Gets a specific move
+    /// </summary>
+    /// <param name="id">Move ID</param>
+    /// <returns>The requested move</returns>
+    [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<MoveDTO>> GetMove(int id)
+    {
+        var move = await _gameService.GetMoveAsync(id);
+        return Ok(move);
     }
 }

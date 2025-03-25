@@ -1,24 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
-using TicTacToeAPI.Repositories;
 
-namespace TicTacToeAPI.Models
+namespace TicTacToeAPI.Models;
+
+public partial class Game
 {
-    public class Game
-    {
-        public int Id { get; set; }
-        public int PlayerXId { get; set; }
-        public int? PlayerOId { get; set; } // Nullable until opponent joins
-        public int BoardSize { get; set; }
-        public int WinningLine { get; set; }
-        public string OutcomeStatus { get; set; }
-        public string OutcomeReason { get; set; }
-        public bool IsDeleted { get; set; } = false;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public int Id { get; set; }
 
-        public Player PlayerX { get; set; }
-        public Player PlayerO { get; set; }
+    public int PlayerXid { get; set; }
 
-        public ICollection<Move> Moves { get; set; }
-    }
+    public int? PlayerOid { get; set; }
+
+    public int BoardSize { get; set; }
+
+    public int WinningLine { get; set; }
+
+    public string OutcomeStatus { get; set; } = null!;
+
+    public string OutcomeReason { get; set; } = null!;
+
+    public bool IsDeleted { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public int? PlayerId { get; set; }
+
+    public virtual ICollection<Move> Moves { get; set; } = new List<Move>();
+
+    public virtual Player? Player { get; set; }
+
+    public virtual Player? PlayerO { get; set; }
+
+    public virtual Player PlayerX { get; set; } = null!;
 }

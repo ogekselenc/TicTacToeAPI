@@ -1,17 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 
-namespace TicTacToeAPI.Models
+namespace TicTacToeAPI.Models;
+
+public partial class Move
 {
-    public class Move
-    {
-        public int Id { get; set; }
-        public int GameId { get; set; }
-        public int PlayerId { get; set; }
-        public int PositionX { get; set; }
-        public int PositionY { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public int Id { get; set; }
 
-        public Game Game { get; set; }
-        public Player Player { get; set; }
-    }
+    public int GameId { get; set; }
+
+    public int PlayerId { get; set; }
+
+    public int PositionX { get; set; }
+
+    public int PositionY { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public virtual Game Game { get; set; } = null!;
+
+    public virtual Player Player { get; set; } = null!;
 }
