@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tic-Tac-Toe</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        #game-container { display: none; }
+        .board { display: grid; gap: 5px; margin: 20px 0; }
+        .cell { width: 60px; height: 60px; border: 1px solid #333; display: flex; 
+                justify-content: center; align-items: center; font-size: 24px; cursor: pointer; }
+        .cell.x { color: blue; }
+        .cell.o { color: red; }
+        #status { margin: 10px 0; font-weight: bold; }
+        button { padding: 8px 15px; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Tic-Tac-Toe</h1>
+    
+    <!-- Player Setup -->
+    <div id="setup">
+        <h2>Player Setup</h2>
+        <div>
+            <input type="text" id="player1-name" placeholder="Player X Name">
+            <button onclick="createPlayer(1)">Register Player X</button>
+            <span id="player1-id"></span>
+        </div>
+        <div style="margin-top: 10px;">
+            <input type="text" id="player2-name" placeholder="Player O Name">
+            <button onclick="createPlayer(2)">Register Player O</button>
+            <span id="player2-id"></span>
+        </div>
+    </div>
+
+    <!-- Game Creation -->
+    <div id="game-setup" style="display: none; margin-top: 20px;">
+        <h2>Game Setup</h2>
+        Board Size: <input type="number" id="board-size" min="3" max="10" value="3">
+        Winning Line: <input type="number" id="winning-line" min="3" max="10" value="3">
+        <button onclick="createGame()">Create Game</button>
+        <div id="active-games" style="margin-top: 10px;"></div>
+    </div>
+
+    <!-- Game Board -->
+    <div id="game-container">
+        <h2>Game <span id="game-id"></span></h2>
+        <div id="status">Waiting for game to start...</div>
+        <div id="board" class="board"></div>
+        <button onclick="resignGame()">Resign Game</button>
+        <div id="move-history" style="margin-top: 20px;"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
